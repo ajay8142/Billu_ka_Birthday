@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+<title>A Birthday Surprise</title>
+<meta name="description" content="A little locked surprise, just for you." />
+<meta name="theme-color" content="#1a0002" />
+<meta property="og:title" content="A Birthday Surprise" />
+<meta property="og:description" content="A little locked surprise, just for you." />
+<meta property="og:type" content="website" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='24' font-size='26' text-anchor='middle'%3E%E2%9D%A4%EF%B8%8F%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="phone-frame">
+
+  <!-- ambient starfield, shared across all screens -->
+  <div id="stars"></div>
+
+  <!-- persistent background-music toggle -->
+  <button class="music-toggle" id="music-toggle" aria-label="Toggle background music">
+    <span id="music-icon">&#128263;</span>
+  </button>
+
+  <!-- SCREEN 1 : LOCKED -->
+  <section class="screen" id="screen-locked">
+    <div class="glow-top"></div>
+    <button class="avatar-wrap" id="avatar-locked" aria-label="Unlock">
+      <img class="avatar-img" src="assets/profile.jpeg" alt="" onerror="this.parentElement.classList.add('avatar-fallback')">
+    </button>
+    <div class="tiny-heart">&#10084;</div>
+    <h1 class="title-serif">LOCKED</h1>
+    <p class="hint-text">Click on picture above to reveal passkey entry &bull;</p>
+    <div class="brand-credit" id="brand-credit"></div>
+  </section>
+
+  <!-- SCREEN 2 : KEYPAD -->
+  <section class="screen hidden" inert id="screen-keypad">
+    <div class="glow-top"></div>
+    <button class="avatar-wrap avatar-small" id="avatar-keypad" aria-label="Show passkey hint">
+      <img class="avatar-img" src="assets/profile.jpeg" alt="" onerror="this.parentElement.classList.add('avatar-fallback')">
+    </button>
+    <div class="tiny-heart">&#10084;</div>
+    <p class="label-caps">Secure System Entry</p>
+
+    <div class="pin-display" id="pin-display">
+      <span class="pin-dot" data-i="0"></span>
+      <span class="pin-dot" data-i="1"></span>
+      <span class="pin-dot" data-i="2"></span>
+      <span class="pin-dot" data-i="3"></span>
+    </div>
+
+    <div class="keypad" id="keypad">
+      <button class="key" data-key="1">1</button>
+      <button class="key" data-key="2">2</button>
+      <button class="key" data-key="3">3</button>
+      <button class="key" data-key="4">4</button>
+      <button class="key" data-key="5">5</button>
+      <button class="key" data-key="6">6</button>
+      <button class="key" data-key="7">7</button>
+      <button class="key" data-key="8">8</button>
+      <button class="key" data-key="9">9</button>
+      <button class="key key-back" data-key="back">&#9003;</button>
+      <button class="key" data-key="0">0</button>
+      <span></span>
+    </div>
+
+    <p class="hint-text small" id="keypad-error">Hint: click on image again if you forget passkey</p>
+  </section>
+
+  <!-- PASSKEY HINT MODAL -->
+  <div class="modal-overlay hidden" id="hint-modal">
+    <div class="modal-card">
+      <button class="modal-close" id="hint-close" aria-label="Close">&times;</button>
+      <img class="modal-photo" id="modal-photo-img" src="" alt="" onerror="this.parentElement.classList.add('modal-fallback')">
+      <div class="modal-hint" id="modal-hint-text">PASSKEY = ????</div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3 : LOADING -->
+  <section class="screen hidden" inert id="screen-loading">
+    <div class="glow-top"></div>
+    <div class="sticker-bubble-wrap">
+      <div class="speech-bubble" id="loading-bubble">Hmm</div>
+      <div class="sticker" id="panda-loading">&#128060;</div>
+    </div>
+    <h2 class="title-serif small">Loading something special&hellip;</h2>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <p class="label-caps dim">&#10022; just for you &#10022;</p>
+  </section>
+
+  <!-- SCREEN 4 : SPECIAL DAY -->
+  <section class="screen hidden" inert id="screen-day">
+    <div class="glow-top"></div>
+    <h1 class="title-serif big" id="day-title">It's Your Special Day &#127804;</h1>
+    <div class="sticker-bubble-wrap">
+      <div class="speech-bubble">zzZzZz&hellip;</div>
+      <div class="sticker-ring"><div class="sticker">&#128564;&#128060;</div></div>
+    </div>
+    <p class="hint-text tap-hint">tap anywhere to continue</p>
+  </section>
+
+  <!-- SCREEN 5 : AGE COUNTER -->
+  <section class="screen hidden" inert id="screen-age">
+    <div class="glow-top"></div>
+    <div class="sticker-ring small"><div class="sticker">&#128060;</div></div>
+    <h1 class="title-serif big" id="age-title">Happy Birthday<br>My Girl &#127872;</h1>
+    <p class="label-caps dim">you have completed</p>
+
+    <div class="age-grid">
+      <div class="age-stat"><span class="age-num" id="age-years">0</span><span class="age-label">years</span></div>
+      <div class="age-stat"><span class="age-num" id="age-months">0</span><span class="age-label">months</span></div>
+    </div>
+    <div class="age-grid single">
+      <div class="age-stat"><span class="age-num" id="age-days">0</span><span class="age-label">days</span></div>
+    </div>
+
+    <div id="mini-badges"></div>
+
+    <button class="btn btn-primary" id="btn-age-next">Next &#8998;</button>
+  </section>
+
+  <!-- SCREEN 6 : MEMORIES CAROUSEL -->
+  <section class="screen hidden" inert id="screen-memories">
+    <div class="glow-top"></div>
+    <h1 class="title-serif big">Special Memories</h1>
+    <p class="hint-text">Swipe for more &#10022;</p>
+
+    <div class="carousel" id="carousel"></div>
+    <div class="carousel-dots" id="carousel-dots"></div>
+
+    <button class="btn btn-outline" id="btn-memories-next">&#9997;&#65039; message</button>
+  </section>
+
+  <!-- PHOTO LIGHTBOX -->
+  <div class="modal-overlay hidden" id="photo-lightbox">
+    <div class="lightbox-card">
+      <button class="modal-close" id="lightbox-close" aria-label="Close">&times;</button>
+      <img class="lightbox-img" id="lightbox-img" src="" alt="">
+    </div>
+  </div>
+
+  <!-- SCREEN 6.5 : VIDEO MESSAGE -->
+  <section class="screen hidden" inert id="screen-video">
+    <div class="glow-top"></div>
+    <h1 class="title-serif big">A Little Video<br>Just For You</h1>
+    <p class="hint-text">Tap play to watch &#127916;</p>
+
+    <div class="video-wrap" id="video-wrap">
+      <video id="surprise-video" playsinline preload="metadata"></video>
+      <button class="video-play-btn" id="video-play-btn" aria-label="Play video">
+        <span class="video-play-icon">&#9658;</span>
+      </button>
+    </div>
+
+    <p class="hint-text small" id="video-hint">tap the button to play</p>
+  </section>
+
+  <!-- VIDEO END MESSAGE MODAL -->
+  <div class="modal-overlay hidden" id="video-message-modal">
+    <div class="modal-card video-message-card">
+      <div class="tiny-heart">&#10084;</div>
+      <p class="video-message-text" id="video-message-text"></p>
+      <button class="btn btn-primary" id="video-message-continue">Continue &#8594;</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 7 : LETTER ENVELOPE -->
+  <section class="screen hidden" inert id="screen-envelope">
+    <div class="glow-top"></div>
+    <h1 class="title-serif big">A Letter, Just For You</h1>
+    <p class="hint-text italic">Tap the heart to unseal your message&hellip;</p>
+
+    <button class="envelope-card" id="envelope-btn">
+      <div class="envelope-icon">
+        <div class="envelope-shape"></div>
+        <div class="envelope-heart">&#10084;</div>
+      </div>
+      <span class="envelope-caption" id="envelope-caption">tap to open</span>
+    </button>
+
+    <div class="dot-divider"><span></span><span class="dot-heart">&#10084;</span><span></span></div>
+  </section>
+
+  <!-- SCREEN 8 : LETTER / MESSAGE -->
+  <section class="screen hidden" inert id="screen-letter">
+    <div class="letter-card">
+      <div class="letter-head">
+        <div>
+          <h2 class="title-serif letter-title">Just For You &#10024;</h2>
+          <p class="letter-sub">From my heart to yours</p>
+        </div>
+        <button class="modal-close" id="letter-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="letter-media" id="letter-media"></div>
+      <div class="letter-body" id="letter-body"></div>
+      <div class="letter-actions">
+        <button class="btn btn-primary" id="btn-celebrate">Celebrate</button>
+        <button class="btn btn-ghost" id="btn-restart">Restart &#8635;</button>
+      </div>
+    </div>
+  </section>
+
+  <canvas id="confetti-canvas"></canvas>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
