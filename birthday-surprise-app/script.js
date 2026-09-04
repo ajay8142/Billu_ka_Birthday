@@ -8,15 +8,8 @@ const CONFIG = {
   // Text shown on the "forgot passkey" hint modal (defaults to the passkey itself)
   passkeyHint: "PASSKEY = 2026",
 
-  // Her name / title used on the age-counter screen
-  personTitle: "Happy Birthday<br>My Billu &#127872;",
-
-  // ISO birth date (YYYY-MM-DD) — years/months/days are calculated live from this
-  birthDate: "1998-09-05",
-
-  // Optional: ISO date (YYYY-MM-DD) you got together — shows a running
-  // "together for X days" badge on the age screen. Leave "" to hide it.
-  togetherSince: "",
+  // Her name / title used on the cut-the-cake screen
+  personTitle: "Happy Birthday<br> Billu &#127872;",
 
   // Captions cycled on the loading screen's speech bubble
   loadingQuotes: [
@@ -344,68 +337,126 @@ document.addEventListener("DOMContentLoaded", () => {
   function goToAge() {
     clearTimeout(dayTimer);
     dayScreen.removeEventListener("click", goToAge);
-    renderAge();
     show("screen-age");
   }
 
-  /* ================= SCREEN 5 : age counter ================= */
-  function calcAge(birthDateStr) {
-    const birth = new Date(birthDateStr + "T00:00:00");
-    const now = new Date();
-    let years = now.getFullYear() - birth.getFullYear();
-    let months = now.getMonth() - birth.getMonth();
-    let days = now.getDate() - birth.getDate();
-    if (days < 0) {
-      months--;
-      const prevMonthLastDay = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
-      days += prevMonthLastDay;
+  /* ================= SCREEN 5 : cut-the-cake (swipe gesture) ================= */
+  const cakeScene = document.getElementById("cake-scene");
+  const cakeHit = document.getElementById("cake-hit");
+  const candles = document.getElementById("candles");
+  const sliceTrail = document.getElementById("slice-trail");
+  const crumbBurst = document.getElementById("crumb-burst");
+  const cakeHint = document.getElementById("cake-hint");
+  const SWIPE_THRESHOLD = 14; // px of drag movement required to count as a cut — small on purpose, so any real swipe registers
+
+  let cakeCut = false;
+  let dragStart = null;
+  let pointerInteracted = false;
+
+  function spawnCrumbs() {
+    for (let i = 0; i < 10; i++) {
+      const crumb = document.createElement("span");
+      crumb.className = "crumb";
+      crumb.style.setProperty("--dx", ((Math.random() - 0.5) * 70) + "px");
+      crumb.style.setProperty("--dy", (-(20 + Math.random() * 30)) + "px");
+      crumb.style.left = (85 + (Math.random() - 0.5) * 30) + "px";
+      crumb.style.top = (44 + (Math.random() - 0.5) * 20) + "px";
+      crumb.style.background = Math.random() < 0.5 ? "var(--pink-soft)" : "#e8c39e";
+      crumbBurst.appendChild(crumb);
+      setTimeout(() => crumb.remove(), 900);
     }
-    if (months < 0) {
-      years--;
-      months += 12;
-    }
-    return { years, months, days };
   }
 
-  function daysUntilNextBirthday(birthDateStr) {
-    const now = new Date(); now.setHours(0, 0, 0, 0);
-    const birth = new Date(birthDateStr + "T00:00:00");
-    let next = new Date(now.getFullYear(), birth.getMonth(), birth.getDate());
-    next.setHours(0, 0, 0, 0);
-    if (next < now) next.setFullYear(next.getFullYear() + 1);
-    return Math.round((next - now) / 86400000);
-  }
+  function cutCake(angleDeg) {
+    if (cakeCut) return;
+    cakeCut = true;
+    cakeHit.disabled = true;
 
-  function daysSince(dateStr) {
-    const start = new Date(dateStr + "T00:00:00");
-    const now = new Date(); now.setHours(0, 0, 0, 0);
-    return Math.floor((now - start) / 86400000);
-  }
-
-  function renderAge() {
-    const { years, months, days } = calcAge(CONFIG.birthDate);
-    document.getElementById("age-years").textContent = years;
-    document.getElementById("age-months").textContent = months;
-    document.getElementById("age-days").textContent = days;
-
-    const badgesEl = document.getElementById("mini-badges");
-    badgesEl.innerHTML = "";
-
-    const untilNext = daysUntilNextBirthday(CONFIG.birthDate);
-    const nextBadge = document.createElement("p");
-    nextBadge.className = "mini-badge";
-    nextBadge.textContent = untilNext === 0
-      ? "🎉 today's the day!"
-      : `🎂 ${untilNext} day${untilNext === 1 ? "" : "s"} until your next birthday`;
-    badgesEl.appendChild(nextBadge);
-
-    if (CONFIG.togetherSince) {
-      const together = daysSince(CONFIG.togetherSince);
-      const togetherBadge = document.createElement("p");
-      togetherBadge.className = "mini-badge";
-      togetherBadge.textContent = `💕 together for ${together} day${together === 1 ? "" : "s"}`;
-      badgesEl.appendChild(togetherBadge);
+    if (typeof angleDeg === "number") {
+      sliceTrail.classList.add("flash");
+      spawnCrumbs();
     }
+
+    setTimeout(() => { candles.classList.add("blown"); }, 120);
+
+    setTimeout(() => {
+      cakeScene.classList.add("cut");
+      sliceTrail.classList.remove("active", "flash");
+    }, 260);
+
+    setTimeout(() => {
+      burstConfetti();
+      burstHearts();
+      cakeHint.textContent = "Happy Birthday! \u{1F389}";
+      cakeHint.classList.add("celebrate");
+    }, 620);
+  }
+
+  cakeHit.addEventListener("pointerdown", e => {
+    if (cakeCut) return;
+    pointerInteracted = true;
+    dragStart = { x: e.clientX, y: e.clientY };
+    cakeHit.setPointerCapture(e.pointerId);
+    const rect = cakeScene.getBoundingClientRect();
+    sliceTrail.style.left = (e.clientX - rect.left) + "px";
+    sliceTrail.style.top = (e.clientY - rect.top) + "px";
+    sliceTrail.style.width = "0px";
+    sliceTrail.classList.add("active");
+  });
+
+  cakeHit.addEventListener("pointermove", e => {
+    if (cakeCut || !dragStart) return;
+    const rect = cakeScene.getBoundingClientRect();
+    const startX = dragStart.x - rect.left;
+    const startY = dragStart.y - rect.top;
+    const curX = e.clientX - rect.left;
+    const curY = e.clientY - rect.top;
+    const dx = curX - startX;
+    const dy = curY - startY;
+    sliceTrail.style.left = startX + "px";
+    sliceTrail.style.top = startY + "px";
+    sliceTrail.style.width = Math.hypot(dx, dy) + "px";
+    const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+    sliceTrail.style.transform = `rotate(${angle}deg)`;
+
+    // cut the moment the swipe crosses the threshold — no need to lift the finger first
+    if (Math.hypot(dx, dy) >= SWIPE_THRESHOLD) {
+      dragStart = null;
+      cutCake(angle);
+    }
+  });
+
+  cakeHit.addEventListener("pointerup", () => {
+    if (cakeCut || !dragStart) { sliceTrail.classList.remove("active"); return; }
+    dragStart = null;
+    sliceTrail.classList.remove("active");
+    cakeScene.classList.add("shake");
+    setTimeout(() => cakeScene.classList.remove("shake"), 400);
+  });
+
+  cakeHit.addEventListener("pointercancel", () => {
+    dragStart = null;
+    sliceTrail.classList.remove("active");
+  });
+
+  // keyboard accessibility: Enter/Space activates the button's click event
+  // with no preceding pointerdown, so this is how keyboard users cut the cake
+  cakeHit.addEventListener("click", () => {
+    if (pointerInteracted) { pointerInteracted = false; return; }
+    cutCake();
+  });
+
+  function resetCake() {
+    cakeCut = false;
+    dragStart = null;
+    pointerInteracted = false;
+    cakeHit.disabled = false;
+    sliceTrail.classList.remove("active", "flash");
+    crumbBurst.innerHTML = "";
+    candles.classList.remove("blown");
+    cakeScene.classList.remove("cut", "shake");
+    cakeHint.classList.remove("celebrate");
+    cakeHint.textContent = "swipe across the cake to cut it \u{2728}";
   }
 
   document.getElementById("btn-age-next").addEventListener("click", () => {
@@ -591,6 +642,7 @@ document.addEventListener("DOMContentLoaded", () => {
     refreshDots();
     envelopeBtn.classList.remove("opening");
     envelopeCaption.textContent = "tap to open";
+    resetCake();
     show("screen-locked");
   }
 

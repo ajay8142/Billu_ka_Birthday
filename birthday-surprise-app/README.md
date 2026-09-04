@@ -1,8 +1,8 @@
 # Birthday Surprise Web App
 
 A locked, passkey-protected birthday surprise page: lock screen → PIN entry →
-loading animation → "special day" reveal → live age counter → swipeable photo
-memories → sealed letter → typewriter message → confetti celebration. A
+loading animation → "special day" reveal → cut-the-cake screen → swipeable
+photo memories → sealed letter → typewriter message → confetti celebration. A
 background-music toggle sits in the top-left corner throughout, and every
 button gives a soft click sound.
 
@@ -25,8 +25,7 @@ Everything you'll want to change lives at the top of **`script.js`**, inside the
 |---|---|
 | `passkey` | The 4-digit code required to unlock the site |
 | `passkeyHint` | Text shown in the "forgot passkey" popup |
-| `personTitle` | Heading on the age-counter screen (HTML allowed) |
-| `birthDate` | `YYYY-MM-DD` — years/months/days are calculated live from this |
+| `personTitle` | Heading on the cut-the-cake screen (HTML allowed) |
 | `profilePhoto` | Circular photo on the lock + keypad screens |
 | `photos` | Array of image paths for the memories carousel |
 | `letterBody` | The message, typed out with a typewriter effect |

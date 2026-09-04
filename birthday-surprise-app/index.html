@@ -105,22 +105,36 @@
     <p class="hint-text tap-hint">tap anywhere to continue</p>
   </section>
 
-  <!-- SCREEN 5 : AGE COUNTER -->
+  <!-- SCREEN 5 : BIRTHDAY CAKE -->
   <section class="screen hidden" inert id="screen-age">
     <div class="glow-top"></div>
     <div class="sticker-ring small"><div class="sticker">&#128060;</div></div>
     <h1 class="title-serif big" id="age-title">Happy Birthday<br>My Girl &#127872;</h1>
-    <p class="label-caps dim">you have completed</p>
 
-    <div class="age-grid">
-      <div class="age-stat"><span class="age-num" id="age-years">0</span><span class="age-label">years</span></div>
-      <div class="age-stat"><span class="age-num" id="age-months">0</span><span class="age-label">months</span></div>
-    </div>
-    <div class="age-grid single">
-      <div class="age-stat"><span class="age-num" id="age-days">0</span><span class="age-label">days</span></div>
+    <div class="cake-scene" id="cake-scene">
+      <div class="cake-plate"></div>
+
+      <div class="cake-halves">
+        <div class="cake-half-mask left"><div class="cake-visual"></div><div class="cake-cut-face"></div></div>
+        <div class="cake-half-mask right"><div class="cake-visual"></div><div class="cake-cut-face"></div></div>
+      </div>
+
+      <button class="cake-hit" id="cake-hit" aria-label="Swipe to cut the cake">
+        <div class="candles" id="candles">
+          <div class="candle"><span class="flame"></span></div>
+          <div class="candle candle-mid"><span class="flame"></span></div>
+          <div class="candle"><span class="flame"></span></div>
+        </div>
+        <div class="cherry left"></div>
+        <div class="cherry right"></div>
+        <div class="cake-visual" id="cake-main"></div>
+      </button>
+
+      <div class="slice-trail" id="slice-trail"></div>
+      <div class="crumb-burst" id="crumb-burst"></div>
     </div>
 
-    <div id="mini-badges"></div>
+    <p class="hint-text cake-hint" id="cake-hint">swipe across the cake to cut it &#10024;</p>
 
     <button class="btn btn-primary" id="btn-age-next">Next &#8998;</button>
   </section>
